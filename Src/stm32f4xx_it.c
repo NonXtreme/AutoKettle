@@ -38,11 +38,13 @@
 /* USER CODE BEGIN 0 */
 #include "hx711.h"
 extern HX711 Wsensor;
-extern char command[1];
+extern char command[8];
+extern relay;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
 extern HCD_HandleTypeDef hhcd_USB_OTG_FS;
+extern RTC_HandleTypeDef hrtc;
 extern TIM_HandleTypeDef htim3;
 extern UART_HandleTypeDef huart2;
 
@@ -204,7 +206,7 @@ void TIM3_IRQHandler(void)
   /* USER CODE BEGIN TIM3_IRQn 0 */
 	int read = HX711_AvgRead(&Wsensor, 10);
 	char buffer[16];
-	sprintf(buffer, "Weight: %d\r\n", read);
+	sprintf(buffer, "W %d R %d", read, relay);
 	HAL_UART_Transmit(&huart2, buffer, 16, 1000);
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
@@ -225,6 +227,20 @@ void USART2_IRQHandler(void)
   /* USER CODE BEGIN USART2_IRQn 1 */
 
   /* USER CODE END USART2_IRQn 1 */
+}
+
+/**
+* @brief This function handles RTC alarms A and B interrupt through EXTI line 17.
+*/
+void RTC_Alarm_IRQHandler(void)
+{
+  /* USER CODE BEGIN RTC_Alarm_IRQn 0 */
+
+  /* USER CODE END RTC_Alarm_IRQn 0 */
+  HAL_RTC_AlarmIRQHandler(&hrtc);
+  /* USER CODE BEGIN RTC_Alarm_IRQn 1 */
+
+  /* USER CODE END RTC_Alarm_IRQn 1 */
 }
 
 /**

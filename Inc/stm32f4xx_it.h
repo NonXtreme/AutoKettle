@@ -58,6 +58,7 @@ void PendSV_Handler(void);
 void SysTick_Handler(void);
 void TIM3_IRQHandler(void);
 void USART2_IRQHandler(void);
+void RTC_Alarm_IRQHandler(void);
 void OTG_FS_IRQHandler(void);
 
 #ifdef __cplusplus
