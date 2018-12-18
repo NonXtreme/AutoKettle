@@ -72,7 +72,7 @@ UART_HandleTypeDef huart2;
 HX711 Wsensor;
 char command[16];
 int relay = 1;
-RTC_TimeTypeDef sTime;
+RTC_TimeTypeDef sTime, sAlarmTime;
 RTC_DateTypeDef sDate;
 RTC_AlarmTypeDef sAlarm;
 /* USER CODE END PV */
@@ -108,14 +108,44 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	} else if (command[0] == 'T') {
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
 
-		sTime.Hours=atoi(command[1]+command[2]);
-		sTime.Minutes=atoi(command[4]+command[5]);
-		sTime.Seconds=atoi(command[7]+command[8]);
-		HAL_RTC_SetTime(&hrtc,&sTime,RTC_FORMAT_BIN);
+		sTime.Hours = atoi(command[1] + command[2]);
+		sTime.Minutes = atoi(command[4] + command[5]);
+		sTime.Seconds = atoi(command[7] + command[8]);
+		HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
 	}
-	HAL_UART_Receive_IT(&huart2, &command, 16);
+	HAL_UART_Receive_IT(huart, command, 16);
 }
 
+void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc) {
+	/* Prevent unused argument(s) compilation warning */
+	UNUSED(hrtc);
+	/* NOTE : This function Should not be modified, when the callback is needed,
+	 the HAL_RTC_AlarmAEventCallback could be implemented in the user file
+	 */
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
+	relay = 0;
+
+	HAL_RTC_GetAlarm(hrtc, &sAlarm, RTC_ALARM_A, RTC_FORMAT_BIN);
+	//sAlarm.Alarm = RTC_ALARM_A;
+	if (sAlarm.AlarmDateWeekDay == RTC_WEEKDAY_SUNDAY) {
+		sAlarm.AlarmDateWeekDay = RTC_WEEKDAY_MONDAY;
+	} else {
+		sAlarm.AlarmDateWeekDay = sAlarm.AlarmDateWeekDay + (uint8_t) 0x01;
+	}
+	//sAlarm.AlarmDateWeekDaySel = RTC_ALARMDATEWEEKDAYSEL_WEEKDAY;
+	//sAlarm.AlarmMask = RTC_ALARMMASK_NONE;
+	//sAlarm.AlarmMask = RTC_ALARMSUBSECONDMASK_ALL;
+	//sAlarmTime.Hours = 10;
+	//sAlarmTime.Minutes = 21;
+	//sAlarmTime.Seconds = (sAlarmTime.Seconds+3)%60;
+	//sAlarm.AlarmTime = sAlarmTime;
+	HAL_RTC_SetAlarm_IT(hrtc, &sAlarm, RTC_FORMAT_BIN);
+}
 /* USER CODE END 0 */
 
 /**
@@ -160,14 +190,26 @@ int main(void) {
 	Wsensor.DOUT_PinType = GPIOE;
 	Wsensor.DOUT_PinNumber = GPIO_PIN_11;
 	Wsensor.mode = 0;
-	HAL_UART_Receive_IT(&huart2, &command, 16);
-	int hour;
-	int minuit;
-	int sec;
-	sTime.Hours=10;
-			sTime.Minutes=20;
-			sTime.Seconds=45;
-			HAL_RTC_SetTime(&hrtc,&sTime,RTC_FORMAT_BIN);
+	HAL_UART_Receive_IT(&huart2, command, 16);
+	sTime.Hours = 10;
+	sTime.Minutes = 20;
+	sTime.Seconds = 55;
+	HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+	sDate.Date = 18;
+	sDate.Month = RTC_MONTH_DECEMBER;
+	sDate.WeekDay = RTC_WEEKDAY_TUESDAY;
+	sDate.Year = 18;
+	HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+	sAlarm.Alarm = RTC_ALARM_A;
+	sAlarm.AlarmDateWeekDay = RTC_WEEKDAY_TUESDAY;
+	sAlarm.AlarmDateWeekDaySel = RTC_ALARMDATEWEEKDAYSEL_WEEKDAY;
+	sAlarm.AlarmMask = RTC_ALARMMASK_SECONDS;
+	sAlarm.AlarmMask = RTC_ALARMSUBSECONDMASK_ALL;
+	sAlarmTime.Hours = 10;
+	sAlarmTime.Minutes = 21;
+	sAlarmTime.Seconds = 0;
+	sAlarm.AlarmTime = sAlarmTime;
+	HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -176,15 +218,14 @@ int main(void) {
 		//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_1);
 		//relay = !relay;
 		//HAL_Delay(5000);
-		HAL_RTC_GetTime(&hrtc,&sTime,RTC_FORMAT_BIN);
-		hour=sTime.Hours;
-		minuit=sTime.Minutes;
-		sec=sTime.Seconds;
 		/* USER CODE END WHILE */
 		MX_USB_HOST_Process();
 
 		/* USER CODE BEGIN 3 */
-
+		HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+		HAL_RTC_GetAlarm(&hrtc, &sAlarm, RTC_ALARM_A, RTC_FORMAT_BIN);
+		HAL_Delay(200);
 	}
 	/* USER CODE END 3 */
 
@@ -300,6 +341,10 @@ static void MX_RTC_Init(void) {
 
 	/* USER CODE END RTC_Init 0 */
 
+	RTC_TimeTypeDef sTime;
+	RTC_DateTypeDef sDate;
+	RTC_AlarmTypeDef sAlarm;
+
 	/* USER CODE BEGIN RTC_Init 1 */
 
 	/* USER CODE END RTC_Init 1 */
@@ -328,9 +373,9 @@ static void MX_RTC_Init(void) {
 		_Error_Handler(__FILE__, __LINE__);
 	}
 
-	sDate.WeekDay = RTC_WEEKDAY_TUESDAY;
+	sDate.WeekDay = RTC_WEEKDAY_WEDNESDAY;
 	sDate.Month = RTC_MONTH_DECEMBER;
-	sDate.Date = 18;
+	sDate.Date = 19;
 	sDate.Year = 18;
 
 	if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK) {
@@ -460,7 +505,7 @@ static void MX_GPIO_Init(void) {
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOD,
-			LD4_Pin | LD3_Pin | LD5_Pin | LD6_Pin | GPIO_PIN_1 | Audio_RST_Pin,
+	LD4_Pin | LD3_Pin | LD5_Pin | LD6_Pin | GPIO_PIN_1 | Audio_RST_Pin,
 			GPIO_PIN_RESET);
 
 	/*Configure GPIO pins : CS_I2C_SPI_Pin PE10 */
