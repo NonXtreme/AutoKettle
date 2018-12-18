@@ -108,12 +108,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	} else if (command[0] == 'T') {
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
 
-		sTime.Hours = atoi(command[1] + command[2]);
-		sTime.Minutes = atoi(command[4] + command[5]);
-		sTime.Seconds = atoi(command[7] + command[8]);
+		sTime.Hours = ((uint8_t) (command[1] - 0)) * 10
+				+ ((uint8_t) (command[2] - 0));
+		sTime.Minutes = ((uint8_t) (command[4] - 0)) * 10
+				+ ((uint8_t) (command[5] - 0));
+		sTime.Seconds = ((uint8_t) (command[7] - 0)) * 10
+				+ ((uint8_t) (command[8] - 0));
 		HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
 	}
-	HAL_UART_Receive_IT(huart, command, 16);
+	HAL_UART_Receive_IT(huart, (uint8_t *) command, 16);
 }
 
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc) {
@@ -190,7 +193,7 @@ int main(void) {
 	Wsensor.DOUT_PinType = GPIOE;
 	Wsensor.DOUT_PinNumber = GPIO_PIN_11;
 	Wsensor.mode = 0;
-	HAL_UART_Receive_IT(&huart2, command, 16);
+	HAL_UART_Receive_IT(&huart2, (uint8_t *) command, 16);
 	sTime.Hours = 10;
 	sTime.Minutes = 20;
 	sTime.Seconds = 55;
