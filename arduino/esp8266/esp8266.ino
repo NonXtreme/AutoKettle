@@ -3,7 +3,8 @@
 
 const char* ssid     = "KanTLovE";
 const char* password = "1234567890";
-int i = 0;
+
+//TEST STRING
 String relay = "R0       ";
 String currentTime = "T17:00:00";
 String alarmTime = "A05:12   "; // OFF = "AF       "
@@ -24,23 +25,23 @@ void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
 //    Serial.print("Incoming message --> ");
     msg[msglen] = '\0';
 //    Serial.println((char *)msg);
-    // send to stm here kub
+    // Send to STM32
     Serial.print((char *)msg);
 }
 
-void onFoundgear(char *attribute, uint8_t* msg, unsigned int msglen) {
+//void onFoundgear(char *attribute, uint8_t* msg, unsigned int msglen) {
 //    Serial.print("Found new member --> ");
 //    for (int i=0; i<msglen; i++)
 //        Serial.print((char)msg[i]);
 //    Serial.println();  
-}
+//}
 
-void onLostgear(char *attribute, uint8_t* msg, unsigned int msglen) {
+//void onLostgear(char *attribute, uint8_t* msg, unsigned int msglen) {
 //    Serial.print("Lost member --> ");
 //    for (int i=0; i<msglen; i++)
 //        Serial.print((char)msg[i]);
 //    Serial.println();
-}
+//}
 
 /* When a microgear is connected, do this */
 void onConnected(char *attribute, uint8_t* msg, unsigned int msglen) {
@@ -99,26 +100,27 @@ void loop() {
 
         if (Serial.available()) {
 //            Serial.println("Publish...");
-         if(i%2 == 0){
-              relay = "R0      ";
-              i++;
-         }
-         else if(i%2 == 1){
-              relay = "R1      ";
-              i++;
-         }
+//         if(i%2 == 0){
+//              relay = "R0      ";
+//              i++;
+//         }
+//         else if(i%2 == 1){
+//              relay = "R1      ";
+//              i++;
+//         }
 //         Serial.println(Serial.read());
 //         microgear.chat(WEBALIAS,Serial.readString());
-         microgear.publish("/weight", Serial.readString());
+
+         microgear.publish("/weight", Serial.readString()); //Send weight to website
             
 //            Serial.print(relay);
 //            Serial.print(currentTime);
             /* Chat with the microgear named ALIAS which is myself */
 //            microgear.chat(BOARDALIAS,"Hello");
             
-            timer = 0;
+//            timer = 0;
         } 
-        else timer += 100;
+//        else timer += 100;
     }
     else {
         Serial.println("connection lost, reconnect.");
