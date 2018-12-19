@@ -13,10 +13,42 @@
   <script src="js/main.js"></script>
 </head>
 <body>
-  <h1 id="connected_NETPIE">h1 kub</h1>
-  <p id="raw_data">raw data kub</p>
-  <p id="get_topic">get_topic kub</p>
-  <strong id="Humidity_temp">Humidity_temp</strong>
-  <input type="text" name="timepicker" class="timepicker"/>
+  <div class="window">
+    <h1 class="title">SMART KETTLE</h1>
+    <div id="connectmsg">
+      <p>
+        Connecting to the controller...
+        <span class="loadingspinner"></span>
+      </p>
+    </div>
+    <div id="controlpanel">
+      <div class="schedule">
+        <button id="btnon">Turn On Kettle</button>
+        <button id="btnoff">Turn Off Kettle</button>
+        <div>
+          <input type="checkbox" name="chkauto" id="chkauto">
+          <label for="chkauto">Schedule Turn On</label>
+        </div>
+        <div class="field">
+          <label for="timepicker">Time</label>
+          <input type="text" name="timepicker" id="timepicker">
+        </div>
+        <div class="field">
+          <label for="duration">Duration</label>
+          <input type="text" name="duration" id="duration" maxlength="3" required>
+          minutes
+        </div>
+      </div>
+      <div class="water">
+        <div id="watergfx">
+          <div></div>
+        </div>
+        <div>
+          <strong>Water Amount: </strong> 
+          <span id="wateramt">0%</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
