@@ -20,28 +20,30 @@ MicroGear microgear(client);
 
 /* If a new message arrives, do this */
 void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
-    Serial.print("Incoming message --> ");
+//    Serial.print("Incoming message --> ");
     msg[msglen] = '\0';
-    Serial.println((char *)msg);
+//    Serial.println((char *)msg);
+    // send to stm here kub
+    Serial.print((char *)msg);
 }
 
 void onFoundgear(char *attribute, uint8_t* msg, unsigned int msglen) {
-    Serial.print("Found new member --> ");
-    for (int i=0; i<msglen; i++)
-        Serial.print((char)msg[i]);
-    Serial.println();  
+//    Serial.print("Found new member --> ");
+//    for (int i=0; i<msglen; i++)
+//        Serial.print((char)msg[i]);
+//    Serial.println();  
 }
 
 void onLostgear(char *attribute, uint8_t* msg, unsigned int msglen) {
-    Serial.print("Lost member --> ");
-    for (int i=0; i<msglen; i++)
-        Serial.print((char)msg[i]);
-    Serial.println();
+//    Serial.print("Lost member --> ");
+//    for (int i=0; i<msglen; i++)
+//        Serial.print((char)msg[i]);
+//    Serial.println();
 }
 
 /* When a microgear is connected, do this */
 void onConnected(char *attribute, uint8_t* msg, unsigned int msglen) {
-    Serial.println("Connected to NETPIE...");
+//    Serial.println("Connected to NEtPIE...");
     /* Set the alias of this microgear ALIAS */
     microgear.setAlias(BOARDALIAS);
 }
@@ -62,20 +64,20 @@ void setup() {
     microgear.on(CONNECTED,onConnected);
 
     Serial.begin(115200);
-    Serial.println("Starting...");
+//    Serial.println("Starting...");
 
     /* Initial WIFI, this is just a basic method to configure WIFI on ESP8266.                       */
     /* You may want to use other method that is more complicated, but provide better user experience */
     if (WiFi.begin(ssid, password)) {
         while (WiFi.status() != WL_CONNECTED) {
             delay(500);
-            Serial.print(".");
+//            Serial.print(".");
         }
     }
 
-    Serial.println("WiFi connected");  
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
+//    Serial.println("WiFi connected");  
+//    Serial.println("IP address: ");
+//    Serial.println(WiFi.localIP());
 
     /* Initial with KEY, SECRET and also set the ALIAS here */
     microgear.init(KEY,SECRET,BOARDALIAS);
@@ -87,6 +89,7 @@ void setup() {
 void loop() {
     /* To check if the microgear is still connected */
     if (microgear.connected()) {
+//      microgear.chat(WEBALIAS,"hihihihihi");
 //        Serial.println("connected");
 
         /* Call this method regularly otherwise the connection may be lost */
@@ -102,10 +105,10 @@ void loop() {
               relay = "R1      ";
               i++;
          }
-              
+//         Serial.println(Serial.read());
             
-            Serial.print(relay);
-            Serial.print(currentTime);
+//            Serial.print(relay);
+//            Serial.print(currentTime);
             /* Chat with the microgear named ALIAS which is myself */
 //            microgear.chat(BOARDALIAS,"Hello");
             
@@ -114,7 +117,7 @@ void loop() {
         else timer += 100;
     }
     else {
-        Serial.println("connection lost, reconnect...");
+        Serial.println("connection lost, reconnect.");
         if (timer >= 5000) {
             microgear.connect(APPID);
             timer = 0;
