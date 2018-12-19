@@ -40,6 +40,8 @@
 extern HX711 Wsensor;
 extern int relay;
 extern char command[9];
+int minWeight = 0;
+int maxWeight = 210000;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -47,8 +49,7 @@ extern HCD_HandleTypeDef hhcd_USB_OTG_FS;
 extern RTC_HandleTypeDef hrtc;
 extern TIM_HandleTypeDef htim3;
 extern UART_HandleTypeDef huart2;
-int minWeight = 0;
-int maxWeight = 210000;
+
 /******************************************************************************/
 /*            Cortex-M4 Processor Interruption and Exception Handlers         */
 /******************************************************************************/
