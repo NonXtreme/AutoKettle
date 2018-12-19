@@ -206,7 +206,7 @@ void TIM3_IRQHandler(void)
 	int read = HX711_AvgRead(&Wsensor, 10);
 	char buffer[16];
 	sprintf(buffer, "W %d R %d", read, relay);
-	HAL_UART_Transmit(&huart2, (uint8_t *) buffer, 16, 1000);
+	HAL_UART_Transmit(&huart2, (uint8_t *) buffer, 16, 100);
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
