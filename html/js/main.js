@@ -15,14 +15,19 @@ function init() {
   });
 
   microgear.on('message', function(topic,msg) {
-    /* ADD: parse message from nodemcu and send them to appropriate functions
+    /* ADD: parse message from controller and send them to appropriate functions:
+    controllerInit(watper, scheon, time, duration) for all the data requested by init()
+    updateWater(watper) for the live update of water data only
+
+    watper = current water percentage in Number
+    scheon = current schedule enabled state in Boolean
+    time = current schedule time in HH:mm String, optional
+    duraion = current on duration in Number, optional
     */
   });
   
   microgear.on('connected', function() {
     microgear.setAlias(WEBALIAS);
-    $("#connectmsg").hide();
-    $("#controlpanel").show();
   });
   
   microgear.on('present', function(event) {
@@ -37,11 +42,61 @@ function init() {
     microgear.connect(APPID);
   });
 
-  $("#timepicker").wickedpicker({
+  // ADD: request the controller to send the data for controllerInit()
+}
+
+function controllerInit(watper, scheon, time, duration) {
+  var tpconf = {
     twentyFour: true,
     title: 'Select Time',
-    timeSeparator: ':'
+    timeSeparator: ':',
+    afterShow: sendScheduleTime
+  };
+  if (time != undefined) tpconf.now = time;
+  $("#connectmsg").hide();
+  $("#controlpanel").show();
+  $("#timepicker").wickedpicker(tpconf);
+  $("#duration").val(duration || 10);
+  enableScheduleFields(scheon);
+  updateWater(watper);
+
+  $("#btnoff").click(function() {
+    // ADD: tell the controller to turn off the kettle
   });
+
+  $("#btnon").click(function() {
+    // ADD: tell the controller to turn on the kettle
+  });
+
+  $("#chkauto").click(function() {
+    var checked = this.checked;
+    enableScheduleFields(checked);
+    // ADD: tell the controller to update the schedule on/off setting
+  });
+
+  $("#duration").change(function() {
+    var dur = Number.parseInt($(this).val());
+    if (Number.isNaN(dur)) return;
+    // ADD: tell the controller to update the duration setting
+  });
+}
+
+function updateWater(watper) {
+  var txt = Math.min(Math.max(watper, 0), 100).toFixed(1) + "%";
+  $("#watergfx div").height(txt);
+  $("#wateramt").text(txt);
+}
+
+function enableScheduleFields(enabled) {
+  $("#chkauto")[0].checked = enabled;
+  $(".field input").each(function() {
+    this.disabled = !enabled;
+  });
+}
+
+function sendScheduleTime() {
+  var time = $("#timepicker").wickedpicker('time');
+  // ADD: tell the controller to update the time setting
 }
 
 window.onload = init;
