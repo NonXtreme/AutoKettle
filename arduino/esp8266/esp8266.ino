@@ -1,8 +1,8 @@
 #include <MicroGear.h>
 #include <ESP8266WiFi.h>
 
-const char* ssid     = "<<YOUR SSID>>";
-const char* password = "<<YOUR PASSWORD>>";
+const char* ssid     = "KanTLovE";
+const char* password = "1234567890";
 int i = 0;
 String relay = "R0      ";
 String currentTime = "T17.00  ";
