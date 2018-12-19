@@ -108,12 +108,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	} else if (command[0] == 'T') {
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
 
-		sTime.Hours = ((uint8_t) (command[1] - 0)) * 10
-				+ ((uint8_t) (command[2] - 0));
-		sTime.Minutes = ((uint8_t) (command[4] - 0)) * 10
-				+ ((uint8_t) (command[5] - 0));
-		sTime.Seconds = ((uint8_t) (command[7] - 0)) * 10
-				+ ((uint8_t) (command[8] - 0));
+		sTime.Hours = ((uint8_t) (command[1] - '0')) * 10
+				+ ((uint8_t) (command[2] - '0'));
+		sTime.Minutes = ((uint8_t) (command[4] - '0')) * 10
+				+ ((uint8_t) (command[5] - '0'));
+		sTime.Seconds = ((uint8_t) (command[7] - '0')) * 10
+				+ ((uint8_t) (command[8] - '0'));
 		HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
 	}
 	HAL_UART_Receive_IT(huart, (uint8_t *) command, 16);
