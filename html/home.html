@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script src="https://cdn.netpie.io/microgear.js"></script>
+<script>
+  const APPID = "EmbeddedLab2018";
+  const KEY = "IJ40DCVoUQAXW23";
+  const SECRET = "tyyTIMnies37G3nTIfjCBjP45";
+
+  const WEBALIAS = "HTML_web";         //  ชื่อของเวป
+  const BOARDALIAS = "esp8266";          //  ชื่อของบอร์ด
+
+  var isActivated;
+  var alarmTime;
+  
+  var microgear = Microgear.create({
+    key: KEY,
+    secret: SECRET,
+    alias : WEBALIAS
+  });
+
+  microgear.on('message',function(topic,msg) {     // 
+    document.getElementById("raw_data").innerHTML = "Data from Node MCU = " + msg;
+    document.getElementById("get_topic").innerHTML = "Topic = " + topic;
+    console.log(msg);  // for debug
+
+  });
+
+  microgear.on('connected', function() {
+    microgear.setAlias(WEBALIAS);
+    document.getElementById("connected_NETPIE").innerHTML = "Connected to NETPIE";
+	microgear.subscribe("/weight");
+  });
+
+  
+  microgear.on('present', function(event) {
+    console.log(event);
+  });
+
+  microgear.on('absent', function(event) {
+    console.log(event);
+  });
+
+  microgear.resettoken(function(err) {
+    microgear.connect(APPID);
+  });
+  
+function sendTime() {
+	a = new Date()
+	console.log("T"+a.toTimeString().split(' ')[0])
+	microgear.publish("/send","T"+a.toTimeString().split(' ')[0]) 
+	// send on/off too here
+}
+  
+//setInterval(sendTime,5000)
+function turnOn() {
+	microgear.publish("/send","R1       ")
+	console.log("R1       ");
+}
+function turnOff(){
+	microgear.publish("/send","R0       ")
+	console.log("R0       ");
+}
+
+function plusHour(){
+	h = document.getElementById('hour').innerHTML
+	document.getElementById('hour').innerHTML =  parseInt(document.getElementById('hour').innerHTML)+1
+}
+function setAlarm(){
+	microgear.publish("/send","A16:29   ");
+	console.log("A16:25   ");
+}
+</script>
+
+<h1 id="connected_NETPIE">h1 kub</h1>
+<p id="raw_data">raw data kub</p>
+<p id="get_topic">get_topic kub</p>
+<button onclick=turnOn()>Turn On kub</button>
+<button onclick=turnOff()>Turn Off kub</button>
+
+
+<p id='hour'>0</p> <button onclick=plusHour()>Plus Hour</button>
+<p id='minute'>0</p> <button>Plus Minute</button>
+<button onclick=setAlarm()>Set Alarm</button>
+</body>
+</html>
