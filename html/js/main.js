@@ -40,7 +40,11 @@ function init() {
   });
 
   var tstkub = setInterval(runSi,1000);
-  $(".timepicker").wickedpicker();
+  $(".timepicker").wickedpicker({
+    twentyFour: true,
+    title: 'Select Time',
+    timeSeparator: ':'
+  });
 }
 
 function runSi() {
