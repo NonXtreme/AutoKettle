@@ -4,8 +4,9 @@
 const char* ssid     = "KanTLovE";
 const char* password = "1234567890";
 int i = 0;
-String relay = "R0      ";
-String currentTime = "T17.00  ";
+String relay = "R0       ";
+String currentTime = "T17:00:00";
+String alarmTime = "A05:12   "; // OFF = "AF       "
 
 #define APPID   "EmbeddedLab2018"
 #define KEY     "IJ40DCVoUQAXW23"
