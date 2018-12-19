@@ -1,16 +1,11 @@
-<!DOCTYPE html>
-<html>
-<body>
-<script src="https://cdn.netpie.io/microgear.js"></script>
-<script>
-  const APPID = "EmbeddedLab2018";
-  const KEY = "IJ40DCVoUQAXW23";
-  const SECRET = "tyyTIMnies37G3nTIfjCBjP45";
+const APPID = "EmbeddedLab2018";
+const KEY = "IJ40DCVoUQAXW23";
+const SECRET = "tyyTIMnies37G3nTIfjCBjP45";
 
+const WEBALIAS = "HTML_web";
+const thing1 = "esp8266";
 
-  const WEBALIAS = "HTML_web";         //  ชื่อตัวเอง
-  const thing1 = "esp8266";          //  ชื่อเพื่อนที่จะคุย
-
+function init() {
   var microgear = Microgear.create({
     key: KEY,
     secret: SECRET,
@@ -26,16 +21,16 @@
       document.getElementById("Humidity_temp").innerHTML = "Humidity = " + split_msg[1] + " % ,Temp = " + split_msg[2] + " c";
     }
   });
-
+  
   microgear.on('connected', function() {
     microgear.setAlias(WEBALIAS);
-    document.getElementById("connected_NETPIE").innerHTML = "Connected to NETPIE"
+    $("#connected_NETPIE").text("Connected to NETPIE");
   });
-
+  
   microgear.on('present', function(event) {
     console.log(event);
   });
-
+  
   microgear.on('absent', function(event) {
     console.log(event);
   });
@@ -43,18 +38,14 @@
   microgear.resettoken(function(err) {
     microgear.connect(APPID);
   });
-  
-function runSi() {
-	a = new Date()
-	console.log(new Date().toLocaleTimeString('en-US', { hour12: false,hour: "numeric", minute: "numeric"}))
+
+  var tstkub = setInterval(runSi,1000);
+  $(".timepicker").wickedpicker();
 }
-var tstkub = setInterval(runSi,1000)  
-</script>
 
-<h1 id="connected_NETPIE">h1 kub</h1>
-<p id="raw_data">raw data kub</p>
-<p id="get_topic">get_topic kub</p>
-<strong id="Humidity_temp">Humidity_temp</strong>
+function runSi() {
+  a = new Date();
+  console.log(new Date().toLocaleTimeString('en-US', { hour12: false,hour: "numeric", minute: "numeric"}));
+}
 
-</body>
-</html>x
+window.onload = init;
