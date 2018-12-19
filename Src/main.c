@@ -73,6 +73,7 @@ HX711 Wsensor;
 char command[9];
 int relay = 1;
 int alarm = 0;
+int inAlarm = 0;
 RTC_TimeTypeDef sTime, sAlarmTime;
 RTC_DateTypeDef sDate;
 RTC_AlarmTypeDef sAlarmA, sAlarmB;
@@ -118,9 +119,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
 	} else if (command[0] == 'A') {
 		if (command[0] == 'F') {
-			alarm = 0;
+			HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_A);
 		} else {
-			alarm = 1;
 			HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
 			HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
 			sAlarmA.Alarm = RTC_ALARM_A;
@@ -157,64 +157,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 			HAL_RTC_SetAlarm_IT(&hrtc, &sAlarmA, RTC_FORMAT_BIN);
 		}
 	}
-	HAL_UART_Receive_IT(huart, (uint8_t *) command, 9);
+
 }
 
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc) {
-	/* Prevent unused argument(s) compilation warning */
-	UNUSED(hrtc);
-	/* NOTE : This function Should not be modified, when the callback is needed,
-	 the HAL_RTC_AlarmAEventCallback could be implemented in the user file
-	 */
-	if (alarm) {
-		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
-		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
-
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_RESET);
-		relay = 1;
-
-		HAL_RTC_GetAlarm(hrtc, &sAlarmA, RTC_ALARM_A, RTC_FORMAT_BIN);
-
-		if (sAlarmA.AlarmTime.Hours == 23 && sAlarmA.AlarmTime.Minutes >= 50) {
-			if (sAlarmA.AlarmDateWeekDay == RTC_WEEKDAY_SUNDAY) {
-				sAlarmB.AlarmDateWeekDay = RTC_WEEKDAY_MONDAY;
-			} else {
-				sAlarmB.AlarmDateWeekDay = sAlarmA.AlarmDateWeekDay
-						+ (uint8_t) 0x01;
-			}
-			sAlarmB.AlarmTime.Hours = 0;
-			sAlarmB.AlarmTime.Minutes = (sAlarmA.AlarmTime.Minutes + 10) % 60;
-		} else {
-			sAlarmB.AlarmDateWeekDay = sAlarmA.AlarmDateWeekDay;
-			if (sAlarmA.AlarmTime.Minutes >= 50) {
-				sAlarmB.AlarmTime.Hours = sAlarmA.AlarmTime.Hours + 1;
-			}
-			sAlarmB.AlarmTime.Minutes = (sAlarmA.AlarmTime.Minutes + 10) % 60;
-
-		}
-		HAL_RTC_SetAlarm_IT(hrtc, &sAlarmB, RTC_FORMAT_BIN);
-
-		//sAlarm.Alarm = RTC_ALARM_A;
-		if (sAlarmA.AlarmDateWeekDay == RTC_WEEKDAY_SUNDAY) {
-			sAlarmA.AlarmDateWeekDay = RTC_WEEKDAY_MONDAY;
-		} else {
-			sAlarmA.AlarmDateWeekDay = sAlarmA.AlarmDateWeekDay
-					+ (uint8_t) 0x01;
-		}
-		//sAlarm.AlarmDateWeekDaySel = RTC_ALARMDATEWEEKDAYSEL_WEEKDAY;
-		//sAlarm.AlarmMask = RTC_ALARMMASK_NONE;
-		//sAlarm.AlarmMask = RTC_ALARMSUBSECONDMASK_ALL;
-		//sAlarmTime.Hours = 10;
-		//sAlarmTime.Minutes = 21;
-		//sAlarmTime.Seconds = (sAlarmTime.Seconds+3)%60;
-		//sAlarm.AlarmTime = sAlarmTime;
-		HAL_RTC_SetAlarm_IT(hrtc, &sAlarmA, RTC_FORMAT_BIN);
-	}
-}
-
-void HAL_RTC_AlarmBEventCallback(RTC_HandleTypeDef *hrtc) {
 	/* Prevent unused argument(s) compilation warning */
 	UNUSED(hrtc);
 	/* NOTE : This function Should not be modified, when the callback is needed,
@@ -225,15 +171,38 @@ void HAL_RTC_AlarmBEventCallback(RTC_HandleTypeDef *hrtc) {
 	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
 	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
 
-	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
-	relay = 0;
-	/*	HAL_RTC_GetAlarm(hrtc, &sAlarmB, RTC_ALARM_B, RTC_FORMAT_BIN);
-	 sAlarmB.Alarm = RTC_ALARM_B;
-	 if (sAlarmB.AlarmDateWeekDay == RTC_WEEKDAY_SUNDAY) {
-	 sAlarmB.AlarmDateWeekDay = RTC_WEEKDAY_MONDAY;
-	 } else {
-	 sAlarmB.AlarmDateWeekDay = sAlarmB.AlarmDateWeekDay + (uint8_t) 0x01;
-	 }*/
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_RESET);
+	relay = 1;
+
+	HAL_RTC_GetAlarm(hrtc, &sAlarmA, RTC_ALARM_A, RTC_FORMAT_BIN);
+
+	if (sAlarmA.AlarmTime.Hours == 23 && sAlarmA.AlarmTime.Minutes >= 50) {
+		if (sAlarmA.AlarmDateWeekDay == RTC_WEEKDAY_SUNDAY) {
+			sAlarmB.AlarmDateWeekDay = RTC_WEEKDAY_MONDAY;
+		} else {
+			sAlarmB.AlarmDateWeekDay = sAlarmA.AlarmDateWeekDay
+					+ (uint8_t) 0x01;
+		}
+		sAlarmB.AlarmTime.Hours = 0;
+		sAlarmB.AlarmTime.Minutes = (sAlarmA.AlarmTime.Minutes + 10) % 60;
+	} else {
+		sAlarmB.AlarmDateWeekDay = sAlarmA.AlarmDateWeekDay;
+		if (sAlarmA.AlarmTime.Minutes >= 50) {
+			sAlarmB.AlarmTime.Hours = sAlarmA.AlarmTime.Hours + 1;
+		} else {
+			sAlarmB.AlarmTime.Hours = sAlarmA.AlarmTime.Hours;
+		}
+		sAlarmB.AlarmTime.Minutes = (sAlarmA.AlarmTime.Minutes + 10) % 60;
+
+	}
+	HAL_RTC_SetAlarm_IT(hrtc, &sAlarmB, RTC_FORMAT_BIN);
+
+	//sAlarm.Alarm = RTC_ALARM_A;
+	if (sAlarmA.AlarmDateWeekDay == RTC_WEEKDAY_SUNDAY) {
+		sAlarmA.AlarmDateWeekDay = RTC_WEEKDAY_MONDAY;
+	} else {
+		sAlarmA.AlarmDateWeekDay = sAlarmA.AlarmDateWeekDay + (uint8_t) 0x01;
+	}
 	//sAlarm.AlarmDateWeekDaySel = RTC_ALARMDATEWEEKDAYSEL_WEEKDAY;
 	//sAlarm.AlarmMask = RTC_ALARMMASK_NONE;
 	//sAlarm.AlarmMask = RTC_ALARMSUBSECONDMASK_ALL;
@@ -241,7 +210,19 @@ void HAL_RTC_AlarmBEventCallback(RTC_HandleTypeDef *hrtc) {
 	//sAlarmTime.Minutes = 21;
 	//sAlarmTime.Seconds = (sAlarmTime.Seconds+3)%60;
 	//sAlarm.AlarmTime = sAlarmTime;
-	//HAL_RTC_SetAlarm_IT(hrtc, &sAlarmB, RTC_FORMAT_BIN);
+	HAL_RTC_SetAlarm_IT(hrtc, &sAlarmA, RTC_FORMAT_BIN);
+
+}
+
+void HAL_RTCEx_AlarmBEventCallback(RTC_HandleTypeDef *hrtc) {
+
+	UNUSED(hrtc);
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
+	relay = 0;
 }
 /* USER CODE END 0 */
 
@@ -287,8 +268,9 @@ int main(void) {
 	Wsensor.DOUT_PinType = GPIOE;
 	Wsensor.DOUT_PinNumber = GPIO_PIN_11;
 	Wsensor.mode = 0;
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_SET);
-	relay=0;
+	Wsensor.offset = 110000;
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
+	relay = 0;
 	HAL_UART_Receive_IT(&huart2, (uint8_t *) command, 9);
 	/*
 	 sTime.Hours = 10;
@@ -327,6 +309,7 @@ int main(void) {
 		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
 		HAL_RTC_GetAlarm(&hrtc, &sAlarmA, RTC_ALARM_A, RTC_FORMAT_BIN);
 		HAL_RTC_GetAlarm(&hrtc, &sAlarmB, RTC_ALARM_B, RTC_FORMAT_BIN);
+		//read = HX711_Read(&Wsensor);
 		HAL_Delay(100);
 	}
 	/* USER CODE END 3 */
@@ -542,7 +525,7 @@ static void MX_TIM3_Init(void) {
 	htim3.Instance = TIM3;
 	htim3.Init.Prescaler = 47999;
 	htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim3.Init.Period = 9999;
+	htim3.Init.Period = 4999;
 	htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	if (HAL_TIM_Base_Init(&htim3) != HAL_OK) {
 		_Error_Handler(__FILE__, __LINE__);
