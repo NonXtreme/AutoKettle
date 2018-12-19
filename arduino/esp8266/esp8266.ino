@@ -47,6 +47,7 @@ void onConnected(char *attribute, uint8_t* msg, unsigned int msglen) {
 //    Serial.println("Connected to NEtPIE...");
     /* Set the alias of this microgear ALIAS */
     microgear.setAlias(BOARDALIAS);
+    microgear.subscribe("/send");
 }
 
 
@@ -107,6 +108,8 @@ void loop() {
               i++;
          }
 //         Serial.println(Serial.read());
+//         microgear.chat(WEBALIAS,Serial.readString());
+         microgear.publish("/weight", Serial.readString());
             
 //            Serial.print(relay);
 //            Serial.print(currentTime);
