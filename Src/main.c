@@ -212,8 +212,6 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart) {
 }
 
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc) {
-	UNUSED(hrtc);
-
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_RESET);
 	relay = 1;
 
@@ -249,8 +247,6 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc) {
 }
 
 void HAL_RTCEx_AlarmBEventCallback(RTC_HandleTypeDef *hrtc) {
-
-	UNUSED(hrtc);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
 	relay = 0;
 	HAL_RTC_DeactivateAlarm(hrtc, RTC_ALARM_B);
@@ -626,7 +622,7 @@ static void MX_GPIO_Init(void) {
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOD,
-	LD4_Pin | LD3_Pin | LD5_Pin | LD6_Pin | GPIO_PIN_1 | Audio_RST_Pin,
+			LD4_Pin | LD3_Pin | LD5_Pin | LD6_Pin | GPIO_PIN_1 | Audio_RST_Pin,
 			GPIO_PIN_RESET);
 
 	/*Configure GPIO pins : CS_I2C_SPI_Pin PE10 */
