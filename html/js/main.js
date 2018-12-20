@@ -2,13 +2,15 @@ const APPID = "EmbeddedLab2018";
 const KEY = "IJ40DCVoUQAXW23";
 const SECRET = "tyyTIMnies37G3nTIfjCBjP45";
 
-const WEBALIAS = "HTML_web";
+const WEBALIAS = "AutoKettle";
 const thing1 = "esp8266";
 
+var tst;
+var microgear;
 function init() {
   $("#controlpanel").hide();
 
-  var microgear = Microgear.create({
+  microgear = Microgear.create({
     key: KEY,
     secret: SECRET,
     alias : WEBALIAS
@@ -24,10 +26,15 @@ function init() {
     time = current schedule time in HH:mm String, optional
     duraion = current on duration in Number, optional
     */
+	updateWater(msg.split(' ')[1]);
   });
   
   microgear.on('connected', function() {
     microgear.setAlias(WEBALIAS);
+	//---
+	controllerInit(0,false,undefined,10);
+	microgear.subscribe("/weight");
+	updateTime()
   });
   
   microgear.on('present', function(event) {
@@ -60,18 +67,30 @@ function controllerInit(watper, scheon, time, duration) {
   enableScheduleFields(scheon);
   updateWater(watper);
 
+  tst = setInterval(updateTime,30000)
+  
   $("#btnoff").click(function() {
     // ADD: tell the controller to turn off the kettle
+	microgear.publish("/send","R0       ")
+	console.log("R0       ");	
   });
 
   $("#btnon").click(function() {
     // ADD: tell the controller to turn on the kettle
+	microgear.publish("/send","R1       ")
+	console.log("R1       ");
   });
 
   $("#chkauto").click(function() {
     var checked = this.checked;
     enableScheduleFields(checked);
     // ADD: tell the controller to update the schedule on/off setting
+	if(!checked) {
+		console.log("AF       ");
+		microgear.publish("/send","AF       ");
+	} else {
+		sendScheduleTime()
+	}
   });
 
   $("#duration").change(function() {
@@ -79,6 +98,7 @@ function controllerInit(watper, scheon, time, duration) {
     if (Number.isNaN(dur)) return;
     // ADD: tell the controller to update the duration setting
   });
+  
 }
 
 function updateWater(watper) {
@@ -97,6 +117,13 @@ function enableScheduleFields(enabled) {
 function sendScheduleTime() {
   var time = $("#timepicker").wickedpicker('time');
   // ADD: tell the controller to update the time setting
+  console.log("A"+time+"   ");
+  microgear.publish("/send","A"+time+"   ") 
 }
-
+function updateTime() {
+	a = new Date()
+	console.log("T"+a.toTimeString().split(' ')[0])
+	microgear.publish("/send","T"+a.toTimeString().split(' ')[0]) 
+}
+  
 window.onload = init;
