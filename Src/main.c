@@ -117,6 +117,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	} else if (command[0] == 'A') {
 		if (command[0] == 'F') {
 			HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_A);
+			HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_B);
 		} else {
 			HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
 			HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
