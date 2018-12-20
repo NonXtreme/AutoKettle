@@ -99,7 +99,7 @@ void MX_USB_HOST_Process(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart) {
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if (command[9] == 'R') {
 		if (command[10] == '0') {
 			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
@@ -154,7 +154,7 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart) {
 		}
 	}
 }
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart) {
 	if (command[0] == 'R') {
 		if (command[1] == '0') {
 			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
