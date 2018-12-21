@@ -26,7 +26,7 @@ function init() {
     time = current schedule time in HH:mm String, optional
     duraion = current on duration in Number, optional
     */
-	updateWater(msg.split(' ')[1]);
+	updateWater(msg.split(' ')[1].substr(0,4));
   });
   
   microgear.on('connected', function() {
