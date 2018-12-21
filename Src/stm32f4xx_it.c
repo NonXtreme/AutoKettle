@@ -229,7 +229,7 @@ void TIM3_IRQHandler(void) {
 		percent = 100;
 	}
 	char buffer[16];
-	sprintf(buffer, "W %f R %d", percent, relay);
+	sprintf(buffer, "W %0.2f R %d", percent, relay);
 	HAL_UART_Transmit_DMA(&huart2, (uint8_t *) buffer, 16);
 	/* USER CODE END TIM3_IRQn 0 */
 	HAL_TIM_IRQHandler(&htim3);
