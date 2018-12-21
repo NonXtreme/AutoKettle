@@ -66,11 +66,13 @@ SPI_HandleTypeDef hspi1;
 TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_rx;
+DMA_HandleTypeDef hdma_usart2_tx;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 HX711 Wsensor;
-char command[9];
+char command[18];
 int relay = 1;
 int alarm = 0;
 int inAlarm = 0;
@@ -82,6 +84,7 @@ RTC_AlarmTypeDef sAlarmA, sAlarmB;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_I2S3_Init(void);
 static void MX_SPI1_Init(void);
@@ -97,7 +100,61 @@ void MX_USB_HOST_Process(void);
 
 /* USER CODE BEGIN 0 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	if (command[9] == 'R') {
+		if (command[10] == '0') {
+			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
+			relay = 0;
+		} else if (command[10] == '1') {
+			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_RESET);
+			relay = 1;
+		}
+	} else if (command[9] == 'T') {
+		sTime.Hours = ((uint8_t) (command[10] - '0')) * 10
+				+ ((uint8_t) (command[11] - '0'));
+		sTime.Minutes = ((uint8_t) (command[13] - '0')) * 10
+				+ ((uint8_t) (command[14] - '0'));
+		sTime.Seconds = ((uint8_t) (command[16] - '0')) * 10
+				+ ((uint8_t) (command[17] - '0'));
+		HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+	} else if (command[9] == 'A') {
+		if (command[9] == 'F') {
+			HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_A);
+			HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_B);
+		} else {
+			HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+			HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+			sAlarmA.AlarmTime.Hours = ((uint8_t) (command[10] - '0')) * 10
+					+ ((uint8_t) (command[11] - '0'));
+			sAlarmA.AlarmTime.Minutes = ((uint8_t) (command[13] - '0')) * 10
+					+ ((uint8_t) (command[14] - '0'));
+			sAlarmA.AlarmTime.Seconds = ((uint8_t) (command[16] - '0')) * 10
+					+ ((uint8_t) (command[17] - '0'));
+			if (sTime.Hours > sAlarmA.AlarmTime.Hours) {
+				if (sDate.WeekDay == RTC_WEEKDAY_SUNDAY) {
+					sAlarmA.AlarmDateWeekDay = RTC_WEEKDAY_MONDAY;
+				} else {
+					sAlarmA.AlarmDateWeekDay = sDate.WeekDay + (uint8_t) 0x01;
+				}
+			} else if (sTime.Hours < sAlarmA.AlarmTime.Hours) {
+				sAlarmA.AlarmDateWeekDay = sDate.WeekDay;
+			} else {
+				if (sTime.Minutes >= sAlarmA.AlarmTime.Minutes) {
+					if (sDate.WeekDay == RTC_WEEKDAY_SUNDAY) {
+						sAlarmA.AlarmDateWeekDay = RTC_WEEKDAY_MONDAY;
+					} else {
+						sAlarmA.AlarmDateWeekDay = sDate.WeekDay
+								+ (uint8_t) 0x01;
+					}
+				} else {
+					sAlarmA.AlarmDateWeekDay = sDate.WeekDay;
+				}
+			}
 
+			HAL_RTC_SetAlarm_IT(&hrtc, &sAlarmA, RTC_FORMAT_BIN);
+		}
+	}
+}
+void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart) {
 	if (command[0] == 'R') {
 		if (command[1] == '0') {
 			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
@@ -155,8 +212,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 }
 
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc) {
-	UNUSED(hrtc);
-
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_RESET);
 	relay = 1;
 
@@ -192,8 +247,6 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc) {
 }
 
 void HAL_RTCEx_AlarmBEventCallback(RTC_HandleTypeDef *hrtc) {
-
-	UNUSED(hrtc);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
 	relay = 0;
 	HAL_RTC_DeactivateAlarm(hrtc, RTC_ALARM_B);
@@ -228,6 +281,7 @@ int main(void) {
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
+	MX_DMA_Init();
 	MX_I2C1_Init();
 	MX_I2S3_Init();
 	MX_SPI1_Init();
@@ -247,7 +301,7 @@ int main(void) {
 	Wsensor.offset = 110000;
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
 	relay = 0;
-	HAL_UART_Receive_IT(&huart2, (uint8_t *) command, 9);
+	HAL_UART_Receive_DMA(&huart2, (uint8_t *) command, 18);
 
 	/* USER CODE END 2 */
 
@@ -511,6 +565,24 @@ static void MX_USART2_UART_Init(void) {
 	if (HAL_UART_Init(&huart2) != HAL_OK) {
 		_Error_Handler(__FILE__, __LINE__);
 	}
+
+}
+
+/** 
+ * Enable DMA controller clock
+ */
+static void MX_DMA_Init(void) {
+	/* DMA controller clock enable */
+	__HAL_RCC_DMA1_CLK_ENABLE()
+	;
+
+	/* DMA interrupt init */
+	/* DMA1_Stream5_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
+	/* DMA1_Stream6_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
 
 }
 

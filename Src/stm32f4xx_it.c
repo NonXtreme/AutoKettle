@@ -39,7 +39,7 @@
 #include "hx711.h"
 extern HX711 Wsensor;
 extern int relay;
-extern char command[9];
+extern char command[18];
 int minWeight = 0;
 int maxWeight = 210000;
 /* USER CODE END 0 */
@@ -48,6 +48,8 @@ int maxWeight = 210000;
 extern HCD_HandleTypeDef hhcd_USB_OTG_FS;
 extern RTC_HandleTypeDef hrtc;
 extern TIM_HandleTypeDef htim3;
+extern DMA_HandleTypeDef hdma_usart2_rx;
+extern DMA_HandleTypeDef hdma_usart2_tx;
 extern UART_HandleTypeDef huart2;
 
 /******************************************************************************/
@@ -188,11 +190,37 @@ void SysTick_Handler(void) {
 /******************************************************************************/
 
 /**
+ * @brief This function handles DMA1 stream5 global interrupt.
+ */
+void DMA1_Stream5_IRQHandler(void) {
+	/* USER CODE BEGIN DMA1_Stream5_IRQn 0 */
+
+	/* USER CODE END DMA1_Stream5_IRQn 0 */
+	HAL_DMA_IRQHandler(&hdma_usart2_rx);
+	/* USER CODE BEGIN DMA1_Stream5_IRQn 1 */
+
+	/* USER CODE END DMA1_Stream5_IRQn 1 */
+}
+
+/**
+ * @brief This function handles DMA1 stream6 global interrupt.
+ */
+void DMA1_Stream6_IRQHandler(void) {
+	/* USER CODE BEGIN DMA1_Stream6_IRQn 0 */
+
+	/* USER CODE END DMA1_Stream6_IRQn 0 */
+	HAL_DMA_IRQHandler(&hdma_usart2_tx);
+	/* USER CODE BEGIN DMA1_Stream6_IRQn 1 */
+
+	/* USER CODE END DMA1_Stream6_IRQn 1 */
+}
+
+/**
  * @brief This function handles TIM3 global interrupt.
  */
 void TIM3_IRQHandler(void) {
 	/* USER CODE BEGIN TIM3_IRQn 0 */
-	double read = HX711_GetAvgValue(&Wsensor, 20);
+	double read = HX711_GetValue(&Wsensor);
 	double percent = (read / (maxWeight - minWeight)) * 100;
 	if (percent < 0) {
 		percent = 0;
@@ -202,7 +230,7 @@ void TIM3_IRQHandler(void) {
 	}
 	char buffer[16];
 	sprintf(buffer, "W %f R %d", percent, relay);
-	HAL_UART_Transmit(&huart2, (uint8_t *) buffer, 16, 100);
+	HAL_UART_Transmit_DMA(&huart2, (uint8_t *) buffer, 16);
 	/* USER CODE END TIM3_IRQn 0 */
 	HAL_TIM_IRQHandler(&htim3);
 	/* USER CODE BEGIN TIM3_IRQn 1 */
@@ -216,10 +244,11 @@ void TIM3_IRQHandler(void) {
 void USART2_IRQHandler(void) {
 	/* USER CODE BEGIN USART2_IRQn 0 */
 
+	HAL_UART_Receive_DMA(&huart2, (uint8_t *) command, 9);
 	/* USER CODE END USART2_IRQn 0 */
 	HAL_UART_IRQHandler(&huart2);
 	/* USER CODE BEGIN USART2_IRQn 1 */
-	HAL_UART_Receive_IT(&huart2, (uint8_t *) command, 9);
+
 	/* USER CODE END USART2_IRQn 1 */
 }
 
