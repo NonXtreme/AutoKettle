@@ -14,7 +14,7 @@ String alarmTime = "A05:12   "; // OFF = "AF       "
 #define SECRET  "tyyTIMnies37G3nTIfjCBjP45"
 
 #define BOARDALIAS   "esp8266"
-#define WEBALIAS   "HTML_web"
+#define WEBALIAS   "AutoKettle"
 WiFiClient client;
 
 int timer = 0;
@@ -48,7 +48,7 @@ void onConnected(char *attribute, uint8_t* msg, unsigned int msglen) {
 //    Serial.println("Connected to NEtPIE...");
     /* Set the alias of this microgear ALIAS */
     microgear.setAlias(BOARDALIAS);
-    microgear.subscribe("/send");
+    microgear.subscribe("/send"); // Receive string from NetPie
 }
 
 
