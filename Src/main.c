@@ -117,7 +117,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 				+ ((uint8_t) (command[17] - '0'));
 		HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
 	} else if (command[9] == 'A') {
-		if (command[9] == 'F') {
+		if (command[10] == 'F') {
 			HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_A);
 			HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_B);
 		} else {
@@ -172,7 +172,7 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart) {
 				+ ((uint8_t) (command[8] - '0'));
 		HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
 	} else if (command[0] == 'A') {
-		if (command[0] == 'F') {
+		if (command[1] == 'F') {
 			HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_A);
 			HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_B);
 		} else {
@@ -312,11 +312,11 @@ int main(void) {
 		MX_USB_HOST_Process();
 
 		/* USER CODE BEGIN 3 */
-		//HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);//For debugging
-		//HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);//For debugging
-		//HAL_RTC_GetAlarm(&hrtc, &sAlarmA, RTC_ALARM_A, RTC_FORMAT_BIN);//For debugging
-		//HAL_RTC_GetAlarm(&hrtc, &sAlarmB, RTC_ALARM_B, RTC_FORMAT_BIN);//For debugging
-		//HAL_Delay(100);//For debugging
+		HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);//For debugging
+		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);//For debugging
+		HAL_RTC_GetAlarm(&hrtc, &sAlarmA, RTC_ALARM_A, RTC_FORMAT_BIN);//For debugging
+		HAL_RTC_GetAlarm(&hrtc, &sAlarmB, RTC_ALARM_B, RTC_FORMAT_BIN);//For debugging
+		HAL_Delay(100);//For debugging
 	}
 	/* USER CODE END 3 */
 
