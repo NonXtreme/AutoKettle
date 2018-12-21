@@ -312,11 +312,11 @@ int main(void) {
 		MX_USB_HOST_Process();
 
 		/* USER CODE BEGIN 3 */
-		HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);//For debugging
-		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);//For debugging
-		HAL_RTC_GetAlarm(&hrtc, &sAlarmA, RTC_ALARM_A, RTC_FORMAT_BIN);//For debugging
-		HAL_RTC_GetAlarm(&hrtc, &sAlarmB, RTC_ALARM_B, RTC_FORMAT_BIN);//For debugging
-		HAL_Delay(100);//For debugging
+		//HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN); //For debugging
+		//HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN); //For debugging
+		//HAL_RTC_GetAlarm(&hrtc, &sAlarmA, RTC_ALARM_A, RTC_FORMAT_BIN); //For debugging
+		//HAL_RTC_GetAlarm(&hrtc, &sAlarmB, RTC_ALARM_B, RTC_FORMAT_BIN); //For debugging
+		//HAL_Delay(100); //For debugging
 	}
 	/* USER CODE END 3 */
 
